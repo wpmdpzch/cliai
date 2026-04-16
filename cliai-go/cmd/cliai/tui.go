@@ -1,133 +1,127 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
-	"os/exec"
-	"strings"
 
+	"github.com/rivo/tview"
 	"github.com/spf13/cobra"
+	"github.com/wpmdpzch/cliai/core"
+	"github.com/wpmdpzch/cliai/pkgcmd"
+	"github.com/gdamore/tcell/v2"
 )
 
-// Window TUI 窗口
-type Window struct {
-	width  int
-	height int
-	mode   string
-	output []string
+// TUI 主应用
+type TUI struct {
+	app      *tview.Application
+	mode     core.Mode
+	input    *tview.InputField
+	output   *tview.TextView
+	modeText *tview.TextView
 }
 
-// NewWindow 创建 TUI 窗口
-func NewWindow() *Window {
-	return &Window{
-		width:  100,
-		height: 30,
-		mode:   "CLI",
-		output: []string{},
+func NewTUI() *TUI {
+	return &TUI{
+		mode: core.ModeCLI,
 	}
 }
 
-// Run 运行窗口
-func (w *Window) Run() error {
-	// 设置终端
-	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
-	exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
+func (t *TUI) Run() error {
+	t.app = tview.NewApplication()
 
-	defer func() {
-		exec.Command("stty", "-F", "/dev/tty", "echo").Run()
-		exec.Command("stty", "-F", "/dev/tty", "-cbreak").Run()
-	}()
+	// 模式指示器
+	t.modeText = tview.NewTextView().
+		SetDynamicColors(true).
+		SetText(t.formatModeBar())
 
-	reader := bufio.NewReader(os.Stdin)
+	// 输出区域
+	t.output = tview.NewTextView().
+		SetDynamicColors(true).
+		SetScrollable(true).
+		SetWordWrap(true).
+		SetText("CLI-AI v0.1.0 - 让命令行会思考\n\n输入命令或自然语言，按 Enter 执行\n按 Tab 切换模式\n")
 
-	fmt.Print("\033[2J\033[H")
-	w.draw()
+	// 输入框
+	t.input = tview.NewInputField().
+		SetLabel(t.formatInputLabel()).
+		SetPlaceholder("输入命令或自然语言...").
+		SetFieldWidth(0).
+		SetDoneFunc(func(key tcell.Key) {
+			if key == tcell.KeyEnter {
+				t.executeCommand()
+			}
+		})
 
-	for {
-		// 光标到输入位置
-		fmt.Printf("\033[%d;1H", w.height-2)
-		fmt.Print("                                                        ")
-		fmt.Printf("\033[%d;1H", w.height-2)
-		fmt.Print("> ")
-
-		input, _ := reader.ReadString('\n')
-		input = strings.TrimSpace(input)
-
-		if input == "exit" || input == "quit" {
-			break
+	// Tab 切换模式
+	t.input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyTab {
+			t.mode.Next()
+			t.updateMode()
+			return nil
 		}
+		return event
+	})
 
-		if input == "mode" {
-			w.cycleMode()
-			fmt.Print("\033[2J\033[H")
-			w.draw()
-			continue
-		}
+	// 布局: 顶部模式条 + 中间输出 + 底部输入
+	flex := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(t.modeText, 1, 0, false).
+		AddItem(t.output, 0, 1, false).
+		AddItem(t.input, 1, 0, false)
 
-		w.output = append(w.output, fmt.Sprintf("[%s]$ %s", w.mode, input))
-		w.output = append(w.output, fmt.Sprintf("→ 执行: %s", input))
-		w.output = append(w.output, "")
+	t.app.SetRoot(flex, true)
+	t.app.SetFocus(t.input)
 
-		fmt.Print("\033[2J\033[H")
-		w.draw()
-	}
-
-	fmt.Println("再见!")
-	return nil
+	return t.app.Run()
 }
 
-func (w *Window) cycleMode() {
-	switch w.mode {
-	case "CLI":
-		w.mode = "PLAN"
-	case "PLAN":
-		w.mode = "BUILD"
-	case "BUILD":
-		w.mode = "CLI"
+func (t *TUI) formatModeBar() string {
+	return fmt.Sprintf("[::b]%s[::-] 模式  |  Tab: 切换  |  exit: 退出", t.mode)
+}
+
+func (t *TUI) formatInputLabel() string {
+	return fmt.Sprintf("[%s]$ ", t.mode)
+}
+
+func (t *TUI) updateMode() {
+	t.modeText.SetText(t.formatModeBar())
+	t.input.SetLabel(t.formatInputLabel())
+}
+
+func (t *TUI) executeCommand() {
+	cmd := t.input.GetText()
+	t.input.SetText("")
+
+	if cmd == "exit" || cmd == "quit" {
+		t.app.Stop()
+		return
+	}
+
+	// 记录命令
+	t.appendOutput(fmt.Sprintf("\n[%s]$ %s\n", t.mode, cmd))
+
+	// 执行命令
+	if err := pkgcmd.ExecCommand(cmd); err != nil {
+		t.appendOutput(fmt.Sprintf("执行失败: %v\n", err))
 	}
 }
 
-func (w *Window) draw() {
-	border := strings.Repeat("─", w.width-2)
-	title := fmt.Sprintf(" CLI-AI v0.1.0  [%s] ", w.mode)
-	hint := " Tab: 切换模式 | exit: 退出 "
-
-	fmt.Println("┌" + border + "┐")
-	fmt.Printf("│%s%-"+fmt.Sprintf("%d", w.width-2-len(title))+"s│\n", title, "")
-	fmt.Printf("│%"+fmt.Sprintf("%d", w.width-2-len(hint))+"s%s│\n", "", hint)
-	fmt.Println("├" + border + "┤")
-
-	areaHeight := w.height - 10
-	start := 0
-	if len(w.output) > areaHeight {
-		start = len(w.output) - areaHeight
-	}
-
-	for i := start; i < len(w.output); i++ {
-		line := w.output[i]
-		if len(line) > w.width-4 {
-			line = line[:w.width-7] + "..."
-		}
-		fmt.Printf("│ %-"+fmt.Sprintf("%d", w.width-4)+"s │\n", line)
-	}
-
-	for i := len(w.output); i < areaHeight; i++ {
-		fmt.Printf("│%"+fmt.Sprintf("%d", w.width-2)+"s │\n", "")
-	}
-
-	fmt.Println("└" + border + "┘")
+func (t *TUI) appendOutput(s string) {
+	t.output.SetText(t.output.GetText(false) + s)
 }
 
-// NewTUICommand 返回 TUI 窗口命令
+// NewTUICommand 返回 TUI 命令
 func NewTUICommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "tui",
 		Short: "启动 TUI 窗口模式",
 		Long:  `启动类似 OpenCode 的 TUI 窗口界面，支持 Tab 切换 CLI/PLAN/BUILD 模式。`,
 		Run: func(cmd *cobra.Command, args []string) {
-			window := NewWindow()
-			window.Run()
+			tui := NewTUI()
+			if err := tui.Run(); err != nil {
+				fmt.Fprintf(os.Stderr, "TUI 错误: %v\n", err)
+				os.Exit(1)
+			}
 		},
 	}
 }

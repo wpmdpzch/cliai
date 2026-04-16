@@ -15,6 +15,7 @@ CLI-AI v0.1.0 - 让命令行会思考
 
 命令:
   repl      启动交互式 REPL（默认）
+  tui       启动 TUI 窗口模式
   help      显示帮助信息
   version   显示版本
   commands  列出可用命令
@@ -27,6 +28,7 @@ CLI-AI v0.1.0 - 让命令行会思考
 
 示例:
   cliai repl
+  cliai tui
   cliai commands
   cliai version
 
@@ -67,8 +69,7 @@ func NewCommandsCommand() *cobra.Command {
 		Use:   "commands",
 		Short: "列出可用命令",
 		Run: func(cmd *cobra.Command, args []string) {
-			cs := pkgcmd.NewCommandSet()
-			cmds := cs.List()
+			cmds := pkgcmd.List()
 
 			fmt.Println("可用命令:")
 			fmt.Println()

@@ -6,31 +6,23 @@ import (
 	"os"
 	"strings"
 
-	"github.com/wpmdpzch/cliai/pkgcmd"
 	"github.com/wpmdpzch/cliai/core"
-	"github.com/wpmdpzch/cliai/config"
+	"github.com/wpmdpzch/cliai/pkgcmd"
 )
-
-// REPL 模式（与 core.Mode 统一）
-type Mode = core.Mode
 
 // REPL 命令行交互
 type REPL struct {
-	mode       Mode
-	scanner    *bufio.Scanner
-	commands   *pkgcmd.CommandSet
-	aiEngine   *core.AIEngine
-	cfg        *config.Config
+	mode     core.Mode
+	scanner  *bufio.Scanner
+	aiEngine *core.AIEngine
 }
 
-func NewREPL(cfg *config.Config) *REPL {
+func NewREPL() *REPL {
 	r := &REPL{
-		mode:     core.ModeCLI,
-		scanner:  bufio.NewScanner(os.Stdin),
-		commands: pkgcmd.NewCommandSet(),
-		cfg:      cfg,
+		mode:    core.ModeCLI,
+		scanner: bufio.NewScanner(os.Stdin),
 	}
-	r.aiEngine = core.NewAIEngine(cfg, r.commands)
+	r.aiEngine = core.NewAIEngine(nil)
 	return r
 }
 
@@ -72,22 +64,15 @@ func (r *REPL) Run() error {
 
 // cycleMode 循环切换模式
 func (r *REPL) cycleMode() {
-	switch r.mode {
-	case core.ModeCLI:
-		r.mode = core.ModePlan
-	case core.ModePlan:
-		r.mode = core.ModeBuild
-	case core.ModeBuild:
-		r.mode = core.ModeCLI
-	}
+	r.mode.Next()
 	fmt.Printf("切换到 %s 模式\n", r.mode)
 }
 
 // handleInput 处理输入
 func (r *REPL) handleInput(input string) error {
 	// 检查是否是内置命令
-	if r.commands.Exists(input) {
-		return r.commands.Exec(input)
+	if pkgcmd.Exists(input) {
+		return pkgcmd.ExecCommand(input)
 	}
 
 	// AI 解析自然语言

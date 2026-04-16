@@ -9,15 +9,15 @@ import (
 	"os"
 	"strings"
 
-	"github.com/wpmdpzch/cliai/pkgcmd"
 	"github.com/wpmdpzch/cliai/config"
+	"github.com/wpmdpzch/cliai/pkgcmd"
 )
 
 // Mode 运行模式
 type Mode int
 
 const (
-	ModeCLI  Mode = iota
+	ModeCLI Mode = iota
 	ModePlan
 	ModeBuild
 )
@@ -35,20 +35,26 @@ func (m Mode) String() string {
 	}
 }
 
+// Next 切换到下一个模式
+func (m *Mode) Next() {
+	switch *m {
+	case ModeCLI:
+		*m = ModePlan
+	case ModePlan:
+		*m = ModeBuild
+	case ModeBuild:
+		*m = ModeCLI
+	}
+}
+
 // AIEngine AI 引擎
 type AIEngine struct {
-	cfg      *config.Config
-	commands *pkgcmd.CommandSet
-	client   *http.Client
+	cfg *config.Config
 }
 
 // NewAIEngine 创建 AI 引擎
-func NewAIEngine(cfg *config.Config, commands *pkgcmd.CommandSet) *AIEngine {
-	return &AIEngine{
-		cfg:      cfg,
-		commands: commands,
-		client:   &http.Client{},
-	}
+func NewAIEngine(cfg *config.Config) *AIEngine {
+	return &AIEngine{cfg: cfg}
 }
 
 // Process 处理输入
@@ -74,7 +80,7 @@ func (e *AIEngine) Process(input string, mode Mode) error {
 
 // buildPrompt 构建提示
 func (e *AIEngine) buildPrompt(input string, mode Mode) string {
-	commands := e.commands.List()
+	commands := pkgcmd.List()
 
 	var cmdList strings.Builder
 	cmdList.WriteString("可用命令:\n")
@@ -119,7 +125,8 @@ func (e *AIEngine) callAI(prompt string) (string, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+e.cfg.AI.APIKey)
 
-	resp, err := e.client.Do(req)
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -210,7 +217,7 @@ func (e *AIEngine) executeActions(actions []string, mode Mode) error {
 
 		// 执行命令
 		fmt.Printf("→ %s\n", action)
-		if err := e.commands.Exec(action); err != nil {
+		if err := pkgcmd.ExecCommand(action); err != nil {
 			fmt.Fprintf(os.Stderr, "执行失败: %v\n", err)
 		}
 	}
