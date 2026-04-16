@@ -1,0 +1,14 @@
+# Go
+cliai-go/cliai
+cliai-go/*.exe
+cliai-go/vendor/
+vendor/
+
+# Build output
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp

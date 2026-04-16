@@ -1,0 +1,112 @@
+[
+  {
+    "name": "curl",
+    "category": "network",
+    "description": "发送 HTTP/HTTPS 请求",
+    "usage": "curl [options] <url>",
+    "example": "curl https://api.example.com/ping",
+    "implemented": "go",
+    "dangerous": false,
+    "priority": "P0"
+  },
+  {
+    "name": "jq",
+    "category": "text",
+    "description": "JSON 处理工具",
+    "usage": "jq [options] <filter> <file>",
+    "example": "jq '.data' file.json",
+    "implemented": "go",
+    "dangerous": false,
+    "priority": "P0"
+  },
+  {
+    "name": "grep",
+    "category": "text",
+    "description": "文本搜索",
+    "usage": "grep [options] <pattern> <file>",
+    "example": "grep 'error' log.txt",
+    "implemented": "system",
+    "dangerous": false,
+    "priority": "P0"
+  },
+  {
+    "name": "cat",
+    "category": "text",
+    "description": "查看文件内容",
+    "usage": "cat <file>",
+    "example": "cat readme.md",
+    "implemented": "system",
+    "dangerous": false,
+    "priority": "P0"
+  },
+  {
+    "name": "ls",
+    "category": "file",
+    "description": "列出目录内容",
+    "usage": "ls [options] <dir>",
+    "example": "ls -la",
+    "implemented": "system",
+    "dangerous": false,
+    "priority": "P0"
+  },
+  {
+    "name": "head",
+    "category": "file",
+    "description": "查看文件头部",
+    "usage": "head [options] <file>",
+    "example": "head -n 10 file.txt",
+    "implemented": "system",
+    "dangerous": false,
+    "priority": "P0"
+  },
+  {
+    "name": "tail",
+    "category": "file",
+    "description": "查看文件尾部",
+    "usage": "tail [options] <file>",
+    "example": "tail -n 10 file.txt",
+    "implemented": "system",
+    "dangerous": false,
+    "priority": "P0"
+  },
+  {
+    "name": "ps",
+    "category": "system",
+    "description": "查看进程",
+    "usage": "ps [options]",
+    "example": "ps aux",
+    "implemented": "system",
+    "dangerous": false,
+    "priority": "P0"
+  },
+  {
+    "name": "df",
+    "category": "system",
+    "description": "查看磁盘使用",
+    "usage": "df [options]",
+    "example": "df -h",
+    "implemented": "system",
+    "dangerous": false,
+    "priority": "P0"
+  },
+  {
+    "name": "free",
+    "category": "system",
+    "description": "查看内存使用",
+    "usage": "free [options]",
+    "example": "free -h",
+    "implemented": "system",
+    "dangerous": false,
+    "priority": "P0"
+  },
+  {
+    "name": "base64",
+    "category": "encoding",
+    "description": "Base64 编解码",
+    "usage": "base64 [options] <file>",
+    "example": "base64 file.txt",
+    "implemented": "go",
+    "dangerous": false,
+    "priority": "P0"
+  }
+]
