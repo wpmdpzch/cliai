@@ -30,11 +30,37 @@
 - [ ] 帮助文档
 
 #### 内置命令包（v0.1）
-- [ ] network: curl, wget, ping
-- [ ] text: jq, grep, sed, awk
-- [ ] file: ls, cat, head, tail
-- [ ] system: ps, top, df, du
-- [ ] encoding: base64, md5, sha256
+
+**P0 - 必须实现**
+```
+network: curl
+text: jq, grep, cat
+file: ls, head, tail
+system: ps, df, free
+encoding: base64
+```
+
+**P1 - 应该实现**
+```
+network: wget, ping
+text: sed, awk, cut, sort, wc
+file: find, du
+system: top
+encoding: md5, sha256
+```
+
+**P2 - 尽量实现**
+```
+network: nc
+text: uniq
+file: diff
+```
+
+**实现策略**
+- Go 原生：curl, jq, base64, md5, sha256（核心工具）
+- 系统调用：其他命令（快速完成 MVP）
+
+详细清单见 [docs/v0.1-commands.md](docs/v0.1-commands.md)
 
 **里程碑**: 能用自然语言执行简单系统命令
 
