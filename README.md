@@ -13,6 +13,34 @@
 
 ---
 
+## 交互模式
+
+采用 **OpenCode 窗口模式**，Tab 键切换三种模式：
+
+| 模式 | 说明 | 能力 |
+|------|------|------|
+| **CLI** | 命令行直接执行 | 原生命令、内置命令包 |
+| **PLAN** | 预执行（AI） | readonly，只读操作 |
+| **BUILD** | 直接操作（AI） | write，可写文件 |
+
+```bash
+# Tab 键循环切换
+[CLI] → [PLAN] → [BUILD] → [CLI] ...
+
+# CLI 模式：直接执行命令
+$ cliai "curl https://api.test.com/ping"
+
+# PLAN 模式：AI 理解，但只读预览
+[PLAN]$ cliai "帮我分析这个日志文件"
+→ AI 解析并展示分析结果（不执行危险操作）
+
+# BUILD 模式：AI 直接操作
+[BUILD]$ cliai "把这个目录下的所有 .js 文件压缩成 one.js"
+→ AI 执行写操作：读取、合并、写入
+```
+
+---
+
 ## 核心理念
 
 **两个入口，一个目标**
@@ -138,6 +166,10 @@ exec:
   confirm_dangerous: true      # 危险命令确认
   timeout: 30                  # 秒
 
+ui:
+  mode_indicator: true         # 显示 CLI/PLAN/BUILD 模式
+  default_mode: "cli"          # 默认模式
+
 tools:
   # 内置命令包
   builtin: ["network", "text", "file", "system", "encoding"]
@@ -155,7 +187,8 @@ cliai/
 │   ├── cmd/cliai/             # 入口
 │   ├── core/                  # 核心解析引擎
 │   ├── builtin/               # 内置命令包
-│   ├── tools/                # 扩展工具链
+│   ├── ui/                    # OpenCode 窗口模式
+│   ├── tools/                 # 扩展工具链
 │   └── config/                # 配置管理
 │
 ├── cliai-py/                   # Python 版本

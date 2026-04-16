@@ -19,6 +19,7 @@
 
 #### Go 版本 - 核心功能
 - [ ] 命令行入口 `cliai`
+- [ ] **OpenCode 窗口 UI**（Tab 切换 CLI/PLAN/BUILD）
 - [ ] 自然语言解析引擎
 - [ ] **内置命令包**（curl, jq, grep 等）
 - [ ] 原生命令直接执行
