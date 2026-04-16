@@ -22,6 +22,19 @@ const (
 	ModeBuild
 )
 
+func (m Mode) String() string {
+	switch m {
+	case ModeCLI:
+		return "CLI"
+	case ModePlan:
+		return "PLAN"
+	case ModeBuild:
+		return "BUILD"
+	default:
+		return "CLI"
+	}
+}
+
 // AIEngine AI 引擎
 type AIEngine struct {
 	cfg      *config.Config

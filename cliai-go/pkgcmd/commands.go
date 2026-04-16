@@ -2,6 +2,7 @@ package pkgcmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -122,8 +123,16 @@ func (cs *CommandSet) Exec(input string) error {
 
 // execGo 执行 Go 原生命令
 func (cs *CommandSet) execGo(cmd *Command, args []string) error {
-	// TODO: 实现 Go 原生命令
-	return nil
+	switch cmd.Name {
+	case "base64":
+		return ExecBase64(args)
+	case "curl":
+		return ExecCurl(args)
+	case "jq":
+		return ExecJq(args)
+	default:
+		return fmt.Errorf("未实现的 Go 命令: %s", cmd.Name)
+	}
 }
 
 // execSystem 执行系统命令
