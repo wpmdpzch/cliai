@@ -8,8 +8,6 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8.svg)](https://golang.org)
-[![Python Version](https://img.shields.io/badge/Python-3.8+-3776AB.svg)](https://python.org)
-[![Rust Version](https://img.shields.io/badge/Rust-1.70+-CE422B.svg)](https://rust-lang.org)
 
 ---
 
@@ -71,56 +69,54 @@ $ cliai "帮我检查服务器性能，列出最吃资源的进程"
 $ cliai "把所有 json 文件转成 csv"
 → 内置 jq/awk，自动识别并转换
 
-# 跨平台兼容
-$ cliai "帮我监控 80 端口的连接数"
-→ Linux/macOS/Windows 自动适配
-
 # 网络调试
 $ cliai "发送一个 GET 请求到 example.com"
 → 内置 curl，无需系统安装
+
+# 自然语言安装命令包
+$ cliai "帮我添加一个图片处理的包"
+→ AI 生成并安装命令脚本
 ```
 
 ---
 
-## 三版本架构
+## 版本策略
 
-| 版本 | 优势 | 安装方式 | 目标用户 |
-|------|------|---------|---------|
-| **Go** | 编译单一二进制，无依赖，跨平台最强 | `curl -fsSL https://get.cliai.dev \| bash` | 通用用户 / 服务器运维 |
-| **Python** | 开发快，生态丰富，易魔改 | `pip install cliai` | 开发者 / 脚本爱好者 |
-| **Rust** | 性能最优，内存安全 | `cargo install cliai` | 性能党 / 极客 |
+> ⚠️ **v0.1 仅开发 Go 版本**。Python/Rust 版本暂停。
+
+| 版本 | 状态 |
+|------|------|
+| **Go** | ✅ 开发中 |
+| **Python** | ⏸️ 暂停 |
+| **Rust** | ⏸️ 暂停 |
+
+> ⚠️ **v0.1 仅支持 Linux 系统**。macOS/Windows 后续版本支持。
 
 ---
 
 ## 快速上手
 
-### Go 版本（推荐）
+### 下载 Release（推荐）
+
+**二进制方式：**
 
 ```bash
-# 一键安装（Linux/macOS）
-curl -fsSL https://get.cliai.dev | bash
+# x86_64 Linux
+curl -L https://github.com/wpmdpzch/cliai/releases/latest/download/cliai-linux-amd64 -o cliai
+chmod +x cliai
+sudo mv cliai /usr/local/bin/
 
-# Windows
-winget install cliai
-
-# 或手动安装
-go install github.com/wpmdpzch/cliai/cliai-go@latest
+# 验证
+cliai --version
 ```
 
-### Python 版本
+**源代码方式：**
 
 ```bash
-pip install cliai
-# 或
-git clone https://github.com/wpmdpzch/cliai && cd cliai-py && pip install -e .
-```
-
-### Rust 版本
-
-```bash
-cargo install cliai
-# 或
-git clone https://github.com/wpmdpzch/cliai && cd cliai-rs && cargo build --release
+git clone https://github.com/wpmdpzch/cliai.git
+cd cliai/cliai-go
+go build -o cliai ./cmd/cliai
+./cliai --version
 ```
 
 ### Docker
@@ -145,6 +141,101 @@ CLI-AI 自带常用工具，不依赖系统：
 
 > 💡 如果系统已安装对应命令，优先使用系统命令（版本更新、更多选项）。
 
+### 命令来源
+
+- **核心命令**（curl, jq）：Go 原生实现
+- **系统命令**（ls, cat）：调用系统，warn 如果不存在
+
+### 添加新命令包
+
+**方式 1：自然语言添加**
+
+```bash
+$ cliai "帮我添加一个图片处理的包"
+→ AI 理解需求，生成命令脚本
+→ 用户选择安装方式
+```
+
+**方式 2：包管理器安装**
+
+```bash
+$ cliai "install image"
+$ cliai "install json"
+$ cliai "install git"
+```
+
+**方式 3：手动安装**
+
+```bash
+# 放入用户目录
+~/.cliai/packages/image/resize
+~/.cliai/packages/image/convert
+
+# 或安装到系统
+/usr/local/cliai/packages/image/
+```
+
+---
+
+## 包管理
+
+### 包结构
+
+每个包一个目录：
+
+```
+image/                          # 包名
+├── command.json               # 元数据（AI 读取）
+├── resize                     # 可执行脚本
+└── convert
+```
+
+**command.json 示例：**
+
+```json
+{
+  "name": "image",
+  "description": "图片处理工具集",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "resize",
+      "usage": "image resize <file> <width> <height>",
+      "description": "调整图片尺寸",
+      "example": "image resize photo.jpg 800 600",
+      "dangerous": false
+    }
+  ]
+}
+```
+
+### 包存放位置
+
+```yaml
+# config.yaml
+packages:
+  # 用户目录（默认）
+  local: "~/.cliai/packages"
+  # 系统目录（可选）
+  system: "/usr/local/cliai/packages"
+```
+
+### 命令冲突处理
+
+同名命令存在时，逐一尝试执行，以能实现功能为准。
+
+### 包来源
+
+- **官方包**：GitHub Releases / 官方文档站
+- **AI 生成**：自然语言描述需求，AI 生成
+- **社区贡献**：GitHub PR
+
+### 命令描述
+
+- 开发者编写命令时必须写好描述
+- AI 从 `command.json` 读取
+- 可从官方文档查询补充
+
 ---
 
 ## 配置
@@ -154,7 +245,7 @@ CLI-AI 自带常用工具，不依赖系统：
 ```yaml
 # ~/.cliai/config.yaml
 ai:
-  provider: "openai"           # openai / claude / gemini / ollama / azure
+  provider: "openai"           # 通用配置，任意 provider
   api_key: "sk-xxxxx"
   base_url: "https://api.openai.com/v1"
   model: "gpt-4o-mini"
@@ -162,7 +253,7 @@ ai:
   max_tokens: 2048
 
 exec:
-  auto_exec: true              # false 则只显示命令
+  auto_exec: false             # true 直接执行，false 只显示命令
   confirm_dangerous: true      # 危险命令确认
   timeout: 30                  # 秒
 
@@ -170,11 +261,9 @@ ui:
   mode_indicator: true         # 显示 CLI/PLAN/BUILD 模式
   default_mode: "cli"          # 默认模式
 
-tools:
-  # 内置命令包
-  builtin: ["network", "text", "file", "system", "encoding"]
-  # 扩展工具
-  enabled: ["docker", "git"]
+packages:
+  local: "~/.cliai/packages"   # 用户包目录
+  system: "/usr/local/cliai/packages"  # 系统包目录
 ```
 
 ---
@@ -186,19 +275,17 @@ cliai/
 ├── cliai-go/                   # Go 版本（主推）
 │   ├── cmd/cliai/             # 入口
 │   ├── core/                  # 核心解析引擎
-│   ├── builtin/               # 内置命令包
+│   ├── builtin/               # 内置命令包（Go 实现）
+│   │   └── commands.json     # 内置命令清单
+│   ├── pkg/                   # 包管理
+│   │   ├── manager.go         # 包管理器
+│   │   └── scanner.go         # 命令扫描器
 │   ├── ui/                    # OpenCode 窗口模式
-│   ├── tools/                 # 扩展工具链
 │   └── config/                # 配置管理
-│
-├── cliai-py/                   # Python 版本
-│   └── cliai/                 # 包
-│
-├── cliai-rs/                   # Rust 版本
-│   └── src/                   # 源码
 │
 ├── docs/                       # 文档
 ├── ROADMAP.md                  # 路线图
+├── DESIGN.md                   # 设计文档
 └── GOVERNANCE.md               # 项目治理
 ```
 
@@ -207,7 +294,7 @@ cliai/
 ## 参与贡献
 
 1. Fork → Feature Branch → PR
-2. 遵循三版本代码规范
+2. 遵循 Go 代码规范（Effective Go）
 3. 所有 PR 需要通过测试
 
 ---
