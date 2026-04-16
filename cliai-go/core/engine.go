@@ -25,12 +25,12 @@ const (
 // AIEngine AI 引擎
 type AIEngine struct {
 	cfg      *config.Config
-	commands *builtin.CommandSet
+	commands *pkgcmd.CommandSet
 	client   *http.Client
 }
 
 // NewAIEngine 创建 AI 引擎
-func NewAIEngine(cfg *config.Config, commands *builtin.CommandSet) *AIEngine {
+func NewAIEngine(cfg *config.Config, commands *pkgcmd.CommandSet) *AIEngine {
 	return &AIEngine{
 		cfg:      cfg,
 		commands: commands,

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/wpmdpzch/cliai/config"
 )
 
 var cfgFile string
@@ -32,16 +33,10 @@ func NewREPLCommand() *cobra.Command {
 }
 
 // loadConfig 加载配置
-func loadConfig(path string) (*Config, error) {
+func loadConfig(path string) (*config.Config, error) {
 	if path == "" {
 		path = os.ExpandEnv("$HOME/.cliai/config.yaml")
 	}
 
-	data, err := os.ReadFile(path)
-	if err != nil {
-		// 返回默认配置
-		return DefaultConfig(), nil
-	}
-
-	return ParseConfig(data)
+	return config.Load(path)
 }

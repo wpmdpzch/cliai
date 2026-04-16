@@ -1,4 +1,4 @@
-package builtin
+package pkgcmd
 
 import (
 	"encoding/json"

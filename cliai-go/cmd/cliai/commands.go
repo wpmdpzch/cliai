@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/wpmdpzch/cliai/pkgcmd"
 )
 
 var helpText = `
@@ -67,14 +67,14 @@ func NewCommandsCommand() *cobra.Command {
 		Use:   "commands",
 		Short: "列出可用命令",
 		Run: func(cmd *cobra.Command, args []string) {
-			cs := builtin.NewCommandSet()
+			cs := pkgcmd.NewCommandSet()
 			cmds := cs.List()
 
 			fmt.Println("可用命令:")
 			fmt.Println()
 
 			// 按类别分组
-			categories := map[string][]*builtin.Command{
+			categories := map[string][]*pkgcmd.Command{
 				"network":  {},
 				"text":     {},
 				"file":     {},

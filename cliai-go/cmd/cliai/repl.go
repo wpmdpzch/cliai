@@ -11,44 +11,27 @@ import (
 	"github.com/wpmdpzch/cliai/config"
 )
 
-// Mode REPL 模式
-type Mode int
-
-const (
-	ModeCLI  Mode = iota // 直接执行
-	ModePlan             // 预执行（只读）
-	ModeBuild            // 直接操作（可写）
-)
-
-func (m Mode) String() string {
-	switch m {
-	case ModeCLI:
-		return "CLI"
-	case ModePlan:
-		return "PLAN"
-	case ModeBuild:
-		return "BUILD"
-	default:
-		return "CLI"
-	}
-}
+// REPL 模式（与 core.Mode 统一）
+type Mode = core.Mode
 
 // REPL 命令行交互
 type REPL struct {
 	mode       Mode
 	scanner    *bufio.Scanner
-	commands   *builtin.CommandSet
+	commands   *pkgcmd.CommandSet
 	aiEngine   *core.AIEngine
 	cfg        *config.Config
 }
 
 func NewREPL(cfg *config.Config) *REPL {
-	return &REPL{
-		mode:     ModeCLI,
+	r := &REPL{
+		mode:     core.ModeCLI,
 		scanner:  bufio.NewScanner(os.Stdin),
-		commands: builtin.NewCommandSet(),
+		commands: pkgcmd.NewCommandSet(),
 		cfg:      cfg,
 	}
+	r.aiEngine = core.NewAIEngine(cfg, r.commands)
+	return r
 }
 
 // Run 启动 REPL
@@ -90,12 +73,12 @@ func (r *REPL) Run() error {
 // cycleMode 循环切换模式
 func (r *REPL) cycleMode() {
 	switch r.mode {
-	case ModeCLI:
-		r.mode = ModePlan
-	case ModePlan:
-		r.mode = ModeBuild
-	case ModeBuild:
-		r.mode = ModeCLI
+	case core.ModeCLI:
+		r.mode = core.ModePlan
+	case core.ModePlan:
+		r.mode = core.ModeBuild
+	case core.ModeBuild:
+		r.mode = core.ModeCLI
 	}
 	fmt.Printf("切换到 %s 模式\n", r.mode)
 }
