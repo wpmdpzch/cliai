@@ -4,7 +4,7 @@
 >
 > A natural language CLI that speaks your language and speaks to your system.
 
-**自然语言 → 系统命令 → 自动执行**
+**自然语言 / 原生命令 → 统一执行**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8.svg)](https://golang.org)
@@ -13,20 +13,43 @@
 
 ---
 
+## 核心理念
+
+**两个入口，一个目标**
+
+```bash
+# 自然语言 → AI 解析 → 执行
+$ cliai "帮我检查服务器性能"
+→ AI 理解意图，生成并执行命令
+
+# 原生命令 → 直接执行（无需系统安装）
+$ cliai "curl https://api.test.com/ping"
+$ cliai "jq '.data' response.json"
+$ cliai "grep -r 'error' /var/log"
+```
+
+> 🎯 **自带命令包**：内置 `curl`、`jq`、`grep`、`sed`、`awk` 等常用工具，不依赖系统环境，跨平台开箱即用。
+
+---
+
 ## 能做什么？
 
 ```bash
 # 排查服务器为什么慢
 $ cliai "帮我检查服务器性能，列出最吃资源的进程"
-→ htop, top, ps aux 等命令已生成并执行
+→ 自动生成并执行性能分析命令
 
 # 批量处理文件
 $ cliai "把所有 json 文件转成 csv"
-→ 自动识别文件，生成转换命令并执行
+→ 内置 jq/awk，自动识别并转换
 
 # 跨平台兼容
 $ cliai "帮我监控 80 端口的连接数"
-→ Linux: netstat/ss | macOS: lsof | Windows: netstat
+→ Linux/macOS/Windows 自动适配
+
+# 网络调试
+$ cliai "发送一个 GET 请求到 example.com"
+→ 内置 curl，无需系统安装
 ```
 
 ---
@@ -53,7 +76,7 @@ curl -fsSL https://get.cliai.dev | bash
 winget install cliai
 
 # 或手动安装
-go install github.com/wpmdpzch/cliai/shellmind@latest
+go install github.com/wpmdpzch/cliai/cliai-go@latest
 ```
 
 ### Python 版本
@@ -80,6 +103,22 @@ docker run -it wpmdpzch/cliai:latest
 
 ---
 
+## 内置命令包
+
+CLI-AI 自带常用工具，不依赖系统：
+
+| 类别 | 内置命令 |
+|------|---------|
+| **网络** | curl, wget, ping, nc |
+| **文本** | jq, grep, sed, awk, cut, sort, uniq |
+| **文件** | ls, cat, head, tail, wc, diff |
+| **系统** | ps, top, df, du, free |
+| **编码** | base64, md5, sha256 |
+
+> 💡 如果系统已安装对应命令，优先使用系统命令（版本更新、更多选项）。
+
+---
+
 ## 配置
 
 首次运行会自动创建配置，也支持手动创建：
@@ -100,7 +139,10 @@ exec:
   timeout: 30                  # 秒
 
 tools:
-  enabled: ["system", "network", "process", "file", "git", "docker"]
+  # 内置命令包
+  builtin: ["network", "text", "file", "system", "encoding"]
+  # 扩展工具
+  enabled: ["docker", "git"]
 ```
 
 ---
@@ -109,17 +151,18 @@ tools:
 
 ```
 cliai/
-├── shellmind/                  # Go 版本（主推）
-│   ├── cmd/shellmind/          # 入口
-│   ├── core/                   # 核心解析引擎
-│   ├── tools/                  # 工具链
-│   └── config/                 # 配置管理
+├── cliai-go/                   # Go 版本（主推）
+│   ├── cmd/cliai/             # 入口
+│   ├── core/                  # 核心解析引擎
+│   ├── builtin/               # 内置命令包
+│   ├── tools/                # 扩展工具链
+│   └── config/                # 配置管理
 │
 ├── cliai-py/                   # Python 版本
-│   └── cliai/                  # 包
+│   └── cliai/                 # 包
 │
 ├── cliai-rs/                   # Rust 版本
-│   └── src/                    # 源码
+│   └── src/                   # 源码
 │
 ├── docs/                       # 文档
 ├── ROADMAP.md                  # 路线图
