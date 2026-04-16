@@ -51,6 +51,7 @@ func main() {
 	rootCmd.AddCommand(NewHelpCommand())
 	rootCmd.AddCommand(NewVersionCommand())
 	rootCmd.AddCommand(NewCommandsCommand())
+	rootCmd.AddCommand(NewTUICommand())
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
