@@ -1,6 +1,6 @@
-# ShellMind
+# CLI-AI
 
-> **让 Shell 会思考**
+> **让命令行会思考**
 >
 > A natural language CLI that speaks your language and speaks to your system.
 
@@ -17,15 +17,15 @@
 
 ```bash
 # 排查服务器为什么慢
-$ sm "帮我检查服务器性能，列出最吃资源的进程"
+$ cliai "帮我检查服务器性能，列出最吃资源的进程"
 → htop, top, ps aux 等命令已生成并执行
 
 # 批量处理文件
-$ sm "把所有 json 文件转成 csv"
+$ cliai "把所有 json 文件转成 csv"
 → 自动识别文件，生成转换命令并执行
 
 # 跨平台兼容
-$ sm "帮我监控 80 端口的连接数"
+$ cliai "帮我监控 80 端口的连接数"
 → Linux: netstat/ss | macOS: lsof | Windows: netstat
 ```
 
@@ -35,9 +35,9 @@ $ sm "帮我监控 80 端口的连接数"
 
 | 版本 | 优势 | 安装方式 | 目标用户 |
 |------|------|---------|---------|
-| **Go** | 编译单一二进制，无依赖，跨平台最强 | `curl -fsSL https://get.shellmind.dev \| bash` | 通用用户 / 服务器运维 |
-| **Python** | 开发快，生态丰富，易魔改 | `pip install shellmind` | 开发者 / 脚本爱好者 |
-| **Rust** | 性能最优，内存安全 | `cargo install shellmind` | 性能党 / 极客 |
+| **Go** | 编译单一二进制，无依赖，跨平台最强 | `curl -fsSL https://get.cliai.dev \| bash` | 通用用户 / 服务器运维 |
+| **Python** | 开发快，生态丰富，易魔改 | `pip install cliai` | 开发者 / 脚本爱好者 |
+| **Rust** | 性能最优，内存安全 | `cargo install cliai` | 性能党 / 极客 |
 
 ---
 
@@ -47,10 +47,10 @@ $ sm "帮我监控 80 端口的连接数"
 
 ```bash
 # 一键安装（Linux/macOS）
-curl -fsSL https://get.shellmind.dev | bash
+curl -fsSL https://get.cliai.dev | bash
 
 # Windows
-winget install shellmind
+winget install cliai
 
 # 或手动安装
 go install github.com/wpmdpzch/cliai/shellmind@latest
@@ -59,17 +59,17 @@ go install github.com/wpmdpzch/cliai/shellmind@latest
 ### Python 版本
 
 ```bash
-pip install shellmind
+pip install cliai
 # 或
-git clone https://github.com/wpmdpzch/cliai && cd shellmind-py && pip install -e .
+git clone https://github.com/wpmdpzch/cliai && cd cliai-py && pip install -e .
 ```
 
 ### Rust 版本
 
 ```bash
-cargo install shellmind
+cargo install cliai
 # 或
-git clone https://github.com/wpmdpzch/cliai && cd shellmind-rs && cargo build --release
+git clone https://github.com/wpmdpzch/cliai && cd cliai-rs && cargo build --release
 ```
 
 ### Docker
@@ -85,7 +85,7 @@ docker run -it wpmdpzch/cliai:latest
 首次运行会自动创建配置，也支持手动创建：
 
 ```yaml
-# ~/.shellmind/config.yaml
+# ~/.cliai/config.yaml
 ai:
   provider: "openai"           # openai / claude / gemini / ollama / azure
   api_key: "sk-xxxxx"
@@ -115,10 +115,10 @@ cliai/
 │   ├── tools/                  # 工具链
 │   └── config/                 # 配置管理
 │
-├── shellmind-py/               # Python 版本
-│   └── shellmind/              # 包
+├── cliai-py/                   # Python 版本
+│   └── cliai/                  # 包
 │
-├── shellmind-rs/               # Rust 版本
+├── cliai-rs/                   # Rust 版本
 │   └── src/                    # 源码
 │
 ├── docs/                       # 文档
@@ -138,4 +138,4 @@ cliai/
 
 ## License
 
-MIT © wpm-flying-nest
+MIT © wpmdpzch

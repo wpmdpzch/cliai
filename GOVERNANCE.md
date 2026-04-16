@@ -1,4 +1,4 @@
-# ShellMind 项目治理
+# CLI-AI 项目治理
 
 ## 版本策略
 
@@ -6,9 +6,9 @@
 
 | 版本 | 优先级 | 维护者 | 角色 |
 |------|--------|--------|------|
-| **shellmind (Go)** | P0 - 主推 | @wpmdpzch | 旗舰版本，最佳用户体验 |
-| **shellmind-py (Python)** | P1 | @wpmdpzch | 开发者版，易扩展 |
-| **shellmind-rs (Rust)** | P2 | @wpmdpzch | 极客版，性能优先 |
+| **cliai-go** | P0 - 主推 | @wpmdpzch | 旗舰版本，最佳用户体验 |
+| **cliai-py** | P1 | @wpmdpzch | 开发者版，易扩展 |
+| **cliai-rs** | P2 | @wpmdpzch | 极客版，性能优先 |
 
 ### 版本发布节奏
 

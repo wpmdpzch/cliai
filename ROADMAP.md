@@ -1,6 +1,6 @@
-# ShellMind Roadmap
+# CLI-AI Roadmap
 
-> 让 Shell 会思考 - Roadmap 规划
+> 让命令行会思考 - Roadmap 规划
 
 ---
 
@@ -18,7 +18,7 @@
 ### v0.1 - MVP (目标: 2026-Q2)
 
 #### Go 版本 - 核心功能
-- [ ] 命令行入口 `sm`
+- [ ] 命令行入口 `cliai`
 - [ ] 自然语言解析引擎
 - [ ] 基础命令执行
 - [ ] OpenAI API 集成
@@ -111,7 +111,7 @@
 - [ ] 成为 DevOps 标准工具
 - [ ] AI Native Shell 体验
 - [ ] 跨云平台统一管理
-- [ ] ShellMind OS (概念产品)
+- [ ] CLI-AI OS (概念产品)
 
 ---
 
