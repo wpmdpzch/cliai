@@ -129,12 +129,18 @@ func execSystemCmd(input string) *ExecResult {
 		cmd.Stdin = os.Stdin
 	}
 	
-	var buf bytes.Buffer
-	cmd.Stdout = &buf
-	cmd.Stderr = &buf
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 
 	err := cmd.Run()
-	return &ExecResult{Output: buf.String(), Error: err}
+	
+	// 如果有 stderr 输出但没有错误，仍然返回 stderr 内容（警告）
+	if err != nil && stderr.Len() > 0 {
+		return &ExecResult{Output: "", Error: fmt.Errorf("%s", strings.TrimSpace(stderr.String()))}
+	}
+	
+	return &ExecResult{Output: stdout.String(), Error: err}
 }
 
 // registerP1Commands 注册 P1 命令
