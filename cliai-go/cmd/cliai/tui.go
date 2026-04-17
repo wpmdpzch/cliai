@@ -147,20 +147,21 @@ func (t *TUI) Run() error {
 }
 
 func (t *TUI) formatModeBar() string {
-	var color string
+	var color tcell.Color
 	var modeName string
 	switch t.mode {
 	case core.ModeCLI:
-		color = "#[00afff:]" // 青色
+		color = colorModeCLI
 		modeName = "CLI"
 	case core.ModePlan:
-		color = "#[ffff00:]" // 黄色
+		color = colorModePLAN
 		modeName = "PLAN"
 	case core.ModeBuild:
-		color = "#[00ff00:]" // 绿色
+		color = colorModeBUILD
 		modeName = "BUILD"
 	}
-	return fmt.Sprintf(" [::b]%s%s[::-]::[::-] ", color, modeName)
+	hexStr := fmt.Sprintf("%06x", int(color))
+	return fmt.Sprintf(" [::b]%s%s[::-]::[::-] ", hexStr, modeName)
 }
 
 func (t *TUI) formatInputLabel() string {
