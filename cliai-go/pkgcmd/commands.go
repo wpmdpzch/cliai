@@ -23,6 +23,14 @@ type Command struct {
 // commands 全局命令注册表
 var commands = make(map[string]*Command)
 
+// aliases 别名表: 别名 -> 原命令
+var aliases = map[string]string{
+	"ll":  "ls -la",
+	"la":  "ls -a",
+	"l":   "ls -l",
+	"grep": "grep --color=auto",
+}
+
 func init() {
 	registerP0Commands()
 	registerP1Commands()
@@ -31,6 +39,36 @@ func init() {
 	registerP4Commands()
 	registerP5Commands()
 	registerShellBuiltins()
+	registerAliases()
+}
+
+// registerAliases 注册别名
+func registerAliases() {
+	for alias, expansion := range aliases {
+		commands[alias] = &Command{
+			Name:        alias,
+			Category:    "alias",
+			Description: "别名 -> " + expansion,
+			Usage:       alias,
+			Example:     alias,
+			Implemented: "alias",
+		}
+	}
+}
+
+// ResolveAlias 解析别名
+func ResolveAlias(input string) string {
+	parts := strings.Fields(input)
+	if len(parts) == 0 {
+		return input
+	}
+
+	first := parts[0]
+	if expansion, ok := aliases[first]; ok {
+		// 替换第一个词并返回完整命令
+		return expansion + " " + strings.Join(parts[1:], " ")
+	}
+	return input
 }
 
 // registerShellBuiltins 注册 shell 内建命令
@@ -102,6 +140,9 @@ func List() []*Command {
 
 // ExecCommand 执行任意命令，返回结果
 func ExecCommand(input string) *ExecResult {
+	// 解析别名
+	input = ResolveAlias(input)
+
 	parts := strings.Fields(input)
 	if len(parts) == 0 {
 		return &ExecResult{Output: "", Error: nil}
@@ -110,6 +151,11 @@ func ExecCommand(input string) *ExecResult {
 	name := parts[0]
 	cmd, ok := commands[name]
 	if !ok {
+		return execSystemCmd(input)
+	}
+
+	// 别名直接执行系统命令
+	if cmd.Implemented == "alias" {
 		return execSystemCmd(input)
 	}
 

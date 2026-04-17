@@ -37,23 +37,28 @@ const (
 
 func NewTUI() *TUI {
 	return &TUI{
-		mode: core.ModeCLI,
+		mode:           core.ModeCLI,
+		history:        []string{},
+		historyIdx:     -1,
+		confirmPending: false,
 	}
 }
 
 // TUI 主应用
 type TUI struct {
-	app        *tview.Application
-	mode       core.Mode
-	input      *tview.InputField
-	output     *tview.TextView
-	modeText   *tview.TextView
-	header     *tview.Flex
-	headerBg   *tview.TextView
-	headerVer  *tview.TextView
-	suggestion *tview.TextView  // 提示区域
-	history    []string         // 命令历史
-	historyIdx int              // 历史索引
+	app            *tview.Application
+	mode           core.Mode
+	input          *tview.InputField
+	output         *tview.TextView
+	modeText       *tview.TextView
+	header         *tview.Flex
+	headerBg       *tview.TextView
+	headerVer      *tview.TextView
+	suggestion     *tview.TextView  // 提示区域
+	history        []string         // 命令历史
+	historyIdx     int              // 历史索引
+	confirmCmd     string           // 待确认的危险命令
+	confirmPending bool             // 等待确认中
 }
 
 func (t *TUI) Run() error {
@@ -337,6 +342,12 @@ func (t *TUI) updateMode() {
 }
 
 func (t *TUI) executeCommand() {
+	// 如果正在等待确认
+	if t.confirmPending {
+		t.handleConfirm()
+		return
+	}
+
 	cmd := t.input.GetText()
 	t.input.SetText("")
 
@@ -351,7 +362,7 @@ func (t *TUI) executeCommand() {
 
 	// 添加到历史
 	t.history = append(t.history, cmd)
-	t.historyIdx = -1 // 重置历史索引
+	t.historyIdx = -1
 
 	// 记录命令
 	t.appendOutput(fmt.Sprintf("\n[dim]>%s>[::-] %s\n", t.mode, cmd))
@@ -362,6 +373,68 @@ func (t *TUI) executeCommand() {
 		return
 	}
 
+	// 检查是否是危险命令
+	if t.isDangerousCommand(cmd) {
+		t.confirmCmd = cmd
+		t.confirmPending = true
+		t.suggestion.SetText(fmt.Sprintf("[red]⚠️ 危险命令![::-] 确认执行 %s ? 输入 [yellow]y[::-] 确认，其他取消", cmd))
+		t.input.SetPlaceholder("按 y 确认，其他取消...")
+		return
+	}
+
+	// 执行命令
+	t.doExecute(cmd)
+}
+
+// handleConfirm 处理危险命令确认
+func (t *TUI) handleConfirm() {
+	cmd := t.input.GetText()
+	t.input.SetText("")
+	t.confirmPending = false
+	t.suggestion.SetText("[dim]Ctrl+I 补全 | ↑↓ 历史 | Tab 切换模式[::-]")
+	t.input.SetPlaceholder("输入命令或自然语言...")
+
+	if strings.ToLower(cmd) == "y" || strings.ToLower(cmd) == "yes" {
+		t.appendOutput("[yellow]确认执行...[::-]\n")
+		t.doExecute(t.confirmCmd)
+	} else {
+		t.appendOutput("[dim]已取消[::-]\n")
+	}
+	t.confirmCmd = ""
+}
+
+// isDangerousCommand 检查命令是否危险
+func (t *TUI) isDangerousCommand(cmd string) bool {
+	parts := strings.Fields(cmd)
+	if len(parts) == 0 {
+		return false
+	}
+
+	firstCmd := parts[0]
+	if c := pkgcmd.Get(firstCmd); c != nil && c.Dangerous {
+		return true
+	}
+
+	// 检查危险关键词
+	dangerousPatterns := []string{
+		"rm -rf /",
+		"dd if=",
+		"> /dev/sd",
+		"mkfs",
+		"shutdown",
+		"reboot",
+		":(){:|:&};:",  // fork bomb
+	}
+	for _, pattern := range dangerousPatterns {
+		if strings.Contains(cmd, pattern) {
+			return true
+		}
+	}
+	return false
+}
+
+// doExecute 执行命令
+func (t *TUI) doExecute(cmd string) {
 	// 执行命令
 	result := pkgcmd.ExecCommand(cmd)
 	if result.Error != nil {
