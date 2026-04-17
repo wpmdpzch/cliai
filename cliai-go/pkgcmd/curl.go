@@ -8,8 +8,19 @@ import (
 	"strings"
 )
 
-// ExecCurl Go 原生 curl 实现
+// ExecCurl 执行 curl
 func ExecCurl(args []string) error {
+	var buf strings.Builder
+	err := ExecCurlToWriter(args, &buf)
+	if err != nil {
+		return err
+	}
+	fmt.Print(buf.String())
+	return nil
+}
+
+// ExecCurlToWriter 执行 curl 并写入指定 writer
+func ExecCurlToWriter(args []string, w io.Writer) error {
 	if len(args) == 0 {
 		return fmt.Errorf("用法: curl [options] <url>")
 	}
@@ -88,11 +99,11 @@ func ExecCurl(args []string) error {
 
 	// 输出响应头
 	if showHeader {
-		fmt.Printf("HTTP/%d %s\n", resp.StatusCode, resp.Status)
+		fmt.Fprintf(w, "HTTP/%d %s\n", resp.StatusCode, resp.Status)
 		for k, v := range resp.Header {
-			fmt.Printf("%s: %s\n", k, strings.Join(v, ", "))
+			fmt.Fprintf(w, "%s: %s\n", k, strings.Join(v, ", "))
 		}
-		fmt.Println()
+		fmt.Fprintln(w)
 	}
 
 	// 输出响应体
@@ -104,7 +115,7 @@ func ExecCurl(args []string) error {
 		defer f.Close()
 		_, err = io.Copy(f, resp.Body)
 	} else {
-		_, err = io.Copy(os.Stdout, resp.Body)
+		_, err = io.Copy(w, resp.Body)
 	}
 
 	return err

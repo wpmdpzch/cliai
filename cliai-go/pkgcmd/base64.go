@@ -1,14 +1,25 @@
 package pkgcmd
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
 )
-
-// ExecBase64 Go 原生 base64 实现
+// ExecBase64 base64 编码/解码
 func ExecBase64(args []string) error {
+	var buf bytes.Buffer
+	err := ExecBase64ToWriter(args, &buf)
+	if err != nil {
+		return err
+	}
+	fmt.Print(buf.String())
+	return nil
+}
+
+// ExecBase64ToWriter 执行 base64 并写入指定 writer
+func ExecBase64ToWriter(args []string, w io.Writer) error {
 	// 无参数时从 stdin 读取
 	if len(args) == 0 {
 		data, err := io.ReadAll(os.Stdin)
@@ -16,11 +27,11 @@ func ExecBase64(args []string) error {
 			return err
 		}
 		encoded := base64.StdEncoding.EncodeToString(data)
-		fmt.Print(encoded)
+		fmt.Fprint(w, encoded)
 		return nil
 	}
 
-	// 简单参数解析
+	// 参数解析
 	decode := false
 	var filename string
 
@@ -37,7 +48,6 @@ func ExecBase64(args []string) error {
 	var err error
 
 	if filename == "" || filename == "-" {
-		// 从 stdin 读取
 		data, err = io.ReadAll(os.Stdin)
 	} else {
 		data, err = os.ReadFile(filename)
@@ -48,17 +58,15 @@ func ExecBase64(args []string) error {
 	}
 
 	if decode {
-		// 解码
 		decoded := make([]byte, base64.StdEncoding.DecodedLen(len(data)))
 		n, err := base64.StdEncoding.Decode(decoded, data)
 		if err != nil {
 			return err
 		}
-		fmt.Print(string(decoded[:n]))
+		fmt.Fprint(w, string(decoded[:n]))
 	} else {
-		// 编码
 		encoded := base64.StdEncoding.EncodeToString(data)
-		fmt.Println(encoded)
+		fmt.Fprintln(w, encoded)
 	}
 
 	return nil

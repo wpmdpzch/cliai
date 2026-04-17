@@ -16,24 +16,20 @@ func main() {
 		cmd := os.Args[1]
 		args := os.Args[2:]
 
-		switch cmd {
-		case "base64":
-			if err := pkgcmd.ExecBase64(args); err != nil {
-				fmt.Fprintln(os.Stderr, "错误:", err)
+		// 检查是否是注册的命令
+		if pkgcmd.Exists(cmd) {
+			// 构建完整命令字符串
+			fullCmd := cmd
+			for _, arg := range args {
+				fullCmd += " " + arg
+			}
+			// 执行命令
+			result := pkgcmd.ExecCommand(fullCmd)
+			if result.Error != nil {
+				fmt.Fprintln(os.Stderr, "错误:", result.Error)
 				os.Exit(1)
 			}
-			return
-		case "curl":
-			if err := pkgcmd.ExecCurl(args); err != nil {
-				fmt.Fprintln(os.Stderr, "错误:", err)
-				os.Exit(1)
-			}
-			return
-		case "jq":
-			if err := pkgcmd.ExecJq(args); err != nil {
-				fmt.Fprintln(os.Stderr, "错误:", err)
-				os.Exit(1)
-			}
+			fmt.Print(result.Output)
 			return
 		}
 	}

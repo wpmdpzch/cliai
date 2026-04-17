@@ -72,7 +72,12 @@ func (r *REPL) cycleMode() {
 func (r *REPL) handleInput(input string) error {
 	// 检查是否是内置命令
 	if pkgcmd.Exists(input) {
-		return pkgcmd.ExecCommand(input)
+		result := pkgcmd.ExecCommand(input)
+		if result.Error != nil {
+			return result.Error
+		}
+		fmt.Print(result.Output)
+		return nil
 	}
 
 	// AI 解析自然语言

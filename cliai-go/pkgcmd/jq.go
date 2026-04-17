@@ -8,8 +8,19 @@ import (
 	"strings"
 )
 
-// ExecJq Go 原生 jq 实现（简化版）
+// ExecJq 执行 jq
 func ExecJq(args []string) error {
+	var buf strings.Builder
+	err := ExecJqToWriter(args, &buf)
+	if err != nil {
+		return err
+	}
+	fmt.Print(buf.String())
+	return nil
+}
+
+// ExecJqToWriter 执行 jq 并写入指定 writer
+func ExecJqToWriter(args []string, w io.Writer) error {
 	if len(args) == 0 {
 		return fmt.Errorf("用法: jq [options] <filter> <file>")
 	}
@@ -69,14 +80,13 @@ func ExecJq(args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(output))
+	fmt.Fprintln(w, string(output))
 
 	return nil
 }
 
 // applyFilter 应用 jq 风格的过滤器
 func applyFilter(data interface{}, filter string) (interface{}, error) {
-	// 简化实现：支持 .field 和 .field.subfield
 	filter = strings.TrimPrefix(filter, ".")
 
 	if filter == "" {
@@ -99,30 +109,11 @@ func applyFilter(data interface{}, filter string) (interface{}, error) {
 				return nil, nil
 			}
 		case []interface{}:
-			// 支持 [0] 索引
-				if part == "@uniq" {
-					current = uniq(v)
-				} else {
-					return nil, fmt.Errorf("数组索引需要 [n] 格式")
-				}
+			return nil, fmt.Errorf("数组索引需要 [n] 格式")
 		default:
 			return nil, fmt.Errorf("无法在 %T 上应用字段 '%s'", current, part)
 		}
 	}
 
 	return current, nil
-}
-
-// uniq 去重
-func uniq(arr []interface{}) []interface{} {
-	seen := make(map[string]bool)
-	result := []interface{}{}
-	for _, v := range arr {
-		key := fmt.Sprintf("%v", v)
-		if !seen[key] {
-			seen[key] = true
-			result = append(result, v)
-		}
-	}
-	return result
 }

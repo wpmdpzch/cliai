@@ -217,8 +217,9 @@ func (e *AIEngine) executeActions(actions []string, mode Mode) error {
 
 		// 执行命令
 		fmt.Printf("→ %s\n", action)
-		if err := pkgcmd.ExecCommand(action); err != nil {
-			fmt.Fprintf(os.Stderr, "执行失败: %v\n", err)
+		result := pkgcmd.ExecCommand(action)
+		if result.Error != nil {
+			fmt.Fprintf(os.Stderr, "执行失败: %v\n", result.Error)
 		}
 	}
 
