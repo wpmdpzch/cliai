@@ -26,6 +26,28 @@ var commands = make(map[string]*Command)
 func init() {
 	registerP0Commands()
 	registerP1Commands()
+	registerShellBuiltins()
+}
+
+// registerShellBuiltins 注册 shell 内建命令
+func registerShellBuiltins() {
+	cmds := []Command{
+		{Name: "cd", Category: "shell", Description: "切换目录", Usage: "cd <目录>", Example: "cd /tmp", Implemented: "builtin"},
+		{Name: "echo", Category: "shell", Description: "输出文本", Usage: "echo [选项] <文本>", Example: "echo hello world", Implemented: "builtin"},
+		{Name: "pwd", Category: "shell", Description: "显示当前目录", Usage: "pwd", Example: "pwd", Implemented: "builtin"},
+		{Name: "mkdir", Category: "shell", Description: "创建目录", Usage: "mkdir [选项] <目录>", Example: "mkdir -p path/to/dir", Implemented: "builtin"},
+		{Name: "touch", Category: "shell", Description: "创建文件", Usage: "touch <文件>", Example: "touch readme.md", Implemented: "builtin"},
+		{Name: "rm", Category: "shell", Description: "删除文件", Usage: "rm [选项] <文件>", Example: "rm file.txt", Dangerous: true, Implemented: "builtin"},
+		{Name: "cp", Category: "shell", Description: "复制文件", Usage: "cp <源> <目标>", Example: "cp a.txt b.txt", Implemented: "builtin"},
+		{Name: "mv", Category: "shell", Description: "移动/重命名文件", Usage: "mv <源> <目标>", Example: "mv a.txt b.txt", Implemented: "builtin"},
+		{Name: "clear", Category: "shell", Description: "清屏", Usage: "clear", Example: "clear", Implemented: "builtin"},
+		{Name: "exit", Category: "shell", Description: "退出", Usage: "exit [代码]", Example: "exit 0", Implemented: "builtin"},
+		{Name: "which", Category: "shell", Description: "查找命令位置", Usage: "which <命令>", Example: "which ls", Implemented: "builtin"},
+		{Name: "history", Category: "shell", Description: "查看命令历史", Usage: "history", Example: "history", Implemented: "builtin"},
+	}
+	for i := range cmds {
+		commands[cmds[i].Name] = &cmds[i]
+	}
 }
 
 // registerP0Commands 注册 P0 命令
@@ -87,7 +109,8 @@ func ExecCommand(input string) *ExecResult {
 		return execSystemCmd(input)
 	}
 
-	if cmd.Implemented == "go" {
+	// Go 原生实现或内置命令都走 execGoCmd
+	if cmd.Implemented == "go" || cmd.Implemented == "builtin" {
 		return execGoCmd(cmd, parts[1:])
 	}
 
@@ -96,21 +119,28 @@ func ExecCommand(input string) *ExecResult {
 
 // execGoCmd 执行 Go 原生命令
 func execGoCmd(cmd *Command, args []string) *ExecResult {
-	var buf bytes.Buffer
-
+	// 先尝试 Go 原生实现
 	switch cmd.Name {
 	case "base64":
+		var buf bytes.Buffer
 		err := ExecBase64ToWriter(args, &buf)
 		return &ExecResult{Output: buf.String(), Error: err}
 	case "curl":
+		var buf bytes.Buffer
 		err := ExecCurlToWriter(args, &buf)
 		return &ExecResult{Output: buf.String(), Error: err}
 	case "jq":
+		var buf bytes.Buffer
 		err := ExecJqToWriter(args, &buf)
 		return &ExecResult{Output: buf.String(), Error: err}
-	default:
-		return &ExecResult{Output: "", Error: fmt.Errorf("未实现的 Go 命令: %s", cmd.Name)}
 	}
+
+	// 如果不是 Go 原生命令但标记为 builtin，调用 builtin 处理
+	if cmd.Implemented == "builtin" {
+		return ExecGoCmdInternal(cmd.Name, args, nil)
+	}
+
+	return &ExecResult{Output: "", Error: fmt.Errorf("未实现的命令: %s", cmd.Name)}
 }
 
 // execSystemCmd 执行系统命令

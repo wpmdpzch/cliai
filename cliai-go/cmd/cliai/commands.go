@@ -85,6 +85,7 @@ func NewCommandsCommand() *cobra.Command {
 				"file":     {},
 				"system":   {},
 				"encoding": {},
+				"shell":    {},
 			}
 
 			for _, c := range cmds {
@@ -111,19 +112,22 @@ func NewCommandsCommand() *cobra.Command {
 				"file":     "📁 文件",
 				"system":   "💻 系统",
 				"encoding": "🔐 编码",
+				"shell":    "🐚 Shell",
 			}
 
 			for cat, cmds := range categories {
 				if len(cmds) > 0 {
 					fmt.Printf("%s%s%s\n", cyan, catNames[cat], reset)
 					fmt.Println(strings.Repeat("─", 40))
-					for _, c := range cmds {
-						impl := dim + "[sys]" + reset
-						if c.Implemented == "go" {
-							impl = green + "[go] " + reset
-						}
-						fmt.Printf("  %-12s %s %s\n", c.Name, c.Description, impl)
+				for _, c := range cmds {
+					impl := dim + "[sys]" + reset
+					if c.Implemented == "go" {
+						impl = green + "[go] " + reset
+					} else if c.Implemented == "builtin" {
+						impl = yellow + "[builtin]" + reset
 					}
+					fmt.Printf("  %-12s %s %s\n", c.Name, c.Description, impl)
+				}
 					fmt.Println()
 				}
 			}
