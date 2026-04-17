@@ -41,12 +41,14 @@ func NewTUI() *TUI {
 
 // TUI 主应用
 type TUI struct {
-	app      *tview.Application
-	mode     core.Mode
-	input    *tview.InputField
-	output   *tview.TextView
-	modeText *tview.TextView
-	header   *tview.Flex
+	app        *tview.Application
+	mode       core.Mode
+	input      *tview.InputField
+	output     *tview.TextView
+	modeText   *tview.TextView
+	header     *tview.Flex
+	headerBg   *tview.TextView  // 标题背景色块
+	headerVer  *tview.TextView  // 版本文字
 }
 
 func (t *TUI) Run() error {
@@ -104,18 +106,22 @@ func (t *TUI) Run() error {
 		return event
 	})
 
-	// 顶部标题栏 - 简洁风格
+	// 顶部标题栏 - 分解为独立组件便于更新
+	t.headerBg = tview.NewTextView()
+	t.headerBg.SetTextAlign(tview.AlignLeft).
+		SetText(" CLI-AI ").
+		SetDynamicColors(true).
+		SetTextColor(tcell.ColorWhite).
+		SetBackgroundColor(colorModeCLI)
+
+	t.headerVer = tview.NewTextView()
+	t.headerVer.SetText(" v0.1.0 ").
+		SetTextColor(colorTextDim).
+		SetBackgroundColor(colorModeCLI)
+
 	t.header = tview.NewFlex().
-		AddItem(tview.NewTextView().
-			SetTextAlign(tview.AlignLeft).
-			SetText(" CLI-AI ").
-			SetDynamicColors(true).
-			SetTextColor(tcell.ColorWhite).
-			SetBackgroundColor(colorModeCLI), 10, 0, false).
-		AddItem(tview.NewTextView().
-			SetText(" v0.1.0 ").
-			SetTextColor(colorTextDim).
-			SetBackgroundColor(colorModeCLI), 8, 0, false).
+		AddItem(t.headerBg, 10, 0, false).
+		AddItem(t.headerVer, 8, 0, false).
 		AddItem(t.modeText, 0, 1, false)
 
 	// 主布局 - 三行
@@ -178,18 +184,18 @@ func (t *TUI) updateMode() {
 	// 更新模式文字
 	t.modeText.SetText(t.formatModeBar())
 	t.input.SetLabel(t.formatInputLabel())
-	
+
 	// 更新模式栏背景色
 	switch t.mode {
 	case core.ModeCLI:
-		t.header.GetItem(0).(*tview.TextView).SetBackgroundColor(colorModeCLI)
-		t.header.GetItem(1).(*tview.TextView).SetBackgroundColor(colorModeCLI)
+		t.headerBg.SetBackgroundColor(colorModeCLI)
+		t.headerVer.SetBackgroundColor(colorModeCLI)
 	case core.ModePlan:
-		t.header.GetItem(0).(*tview.TextView).SetBackgroundColor(colorModePLAN)
-		t.header.GetItem(1).(*tview.TextView).SetBackgroundColor(colorModePLAN)
+		t.headerBg.SetBackgroundColor(colorModePLAN)
+		t.headerVer.SetBackgroundColor(colorModePLAN)
 	case core.ModeBuild:
-		t.header.GetItem(0).(*tview.TextView).SetBackgroundColor(colorModeBUILD)
-		t.header.GetItem(1).(*tview.TextView).SetBackgroundColor(colorModeBUILD)
+		t.headerBg.SetBackgroundColor(colorModeBUILD)
+		t.headerVer.SetBackgroundColor(colorModeBUILD)
 	}
 }
 
