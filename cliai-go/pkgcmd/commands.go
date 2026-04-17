@@ -183,6 +183,10 @@ func execGoCmd(cmd *Command, args []string) *ExecResult {
 		var buf bytes.Buffer
 		err := ExecJqToWriter(args, &buf)
 		return &ExecResult{Output: buf.String(), Error: err}
+	case "host":
+		var buf bytes.Buffer
+		err := ExecHostToWriter(args, &buf)
+		return &ExecResult{Output: buf.String(), Error: err}
 	}
 
 	// 如果不是 Go 原生命令但标记为 builtin，调用 builtin 处理
@@ -256,7 +260,7 @@ func registerP2Commands() {
 		{Name: "arp", Category: "network", Description: "ARP 缓存管理", Usage: "arp [选项]", Example: "arp -a", Implemented: "system"},
 		{Name: "nslookup", Category: "network", Description: "DNS 查询", Usage: "nslookup <域名>", Example: "nslookup example.com", Implemented: "system"},
 		{Name: "dig", Category: "network", Description: "DNS 详细查询", Usage: "dig [选项] <域名>", Example: "dig example.com", Implemented: "system"},
-		{Name: "host", Category: "network", Description: "DNS lookup", Usage: "host <域名>", Example: "host example.com", Implemented: "system"},
+		{Name: "host", Category: "network", Description: "DNS lookup", Usage: "host <域名>", Example: "host example.com", Implemented: "go"},
 		{Name: "traceroute", Category: "network", Description: "路由追踪", Usage: "traceroute [选项] <主机>", Example: "traceroute example.com", Implemented: "system"},
 		{Name: "tracepath", Category: "network", Description: "路径追踪", Usage: "tracepath <主机>", Example: "tracepath example.com", Implemented: "system"},
 		{Name: "nc", Category: "network", Description: "网络瑞士军刀", Usage: "nc [选项] <主机> <端口>", Example: "nc -l 8080", Implemented: "system"},
