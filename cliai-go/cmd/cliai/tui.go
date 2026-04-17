@@ -187,7 +187,7 @@ func (t *TUI) getAutocomplete(currentText string) []string {
 		var matches []string
 		for _, cmd := range pkgcmd.List() {
 			if strings.HasPrefix(strings.ToLower(cmd.Name), prefix) {
-				matches = append(matches, cmd.Name+" - "+cmd.Description)
+				matches = append(matches, cmd.Name)
 			}
 		}
 		return matches
