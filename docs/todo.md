@@ -1,6 +1,6 @@
 # CLI-AI v0.1 Todo List
 
-> 项目进度跟踪 | 更新: 2026-04-16
+> 项目进度跟踪 | 更新: 2026-04-17
 
 ---
 
@@ -12,24 +12,31 @@
 ## 功能待完成
 
 ### P0 - 必须完成
-- [ ] **Tab 键检测**：TUI 中实现真正的 Tab 键切换模式
-- [ ] **命令执行**：TUI 中输入的命令实际调用 pkgcmd 执行
-- [ ] **AI 集成**：自然语言解析，调用 LLM 生成命令
+- [x] **Tab 键检测**：TUI 中实现真正的 Tab 键切换模式
+- [x] **命令执行**：TUI 中输入的命令实际调用 pkgcmd 执行
+- [x] **AI 集成**：自然语言解析，调用 LLM 生成命令
 
 ### P1 - 应该完成
-- [ ] **curl 增强**：支持 POST、Header、Cookie 等
-- [ ] **jq 增强**：支持数组索引、[n]、@unique 等
-- [ ] **base64 文件支持**：支持从文件读取
+- [x] **curl 增强**：支持 POST、Header、Cookie 等
+- [x] **jq 增强**：支持数组索引、[n]、@unique 等
+- [x] **base64 文件支持**：支持从文件读取
 - [ ] **帮助文档**：内置命令帮助信息
 
 ### P2 - 尽量完成
-- [ ] **其他 P0 命令**：grep, cat, ls, ps, df, free, head, tail
+- [x] **其他 P0 命令**：grep, cat, ls, ps, df, free, head, tail
 - [ ] **包管理**：install 命令
-- [ ] **配置文件**：~/.cliai/config.yaml 读取
+- [x] **配置文件**：~/.cliai/config.yaml 读取
 
 ---
 
 ## 问题记录
+
+### 已修复 (2026-04-17)
+- [x] **REPL panic**: nil pointer dereference - 修复：添加 config 加载逻辑
+- [x] **stdin 命令失效**: grep/wc/sed/awk - 修复：execSystemCmd 添加 stdin 检测
+- [x] **jq 数组索引**: 不支持 [0] - 修复：实现 strconv.Atoi 解析
+- [x] **md5/sha256 命令名**: 系统命令是 md5sum/sha256sum - 修复：更新命令注册名
+- [x] **curl POST 数据**: -d 未传递 body - 修复：strings.NewReader(data)
 
 ### Tab 键检测
 - 当前 `bufio.Reader` 无法检测 Tab 键
@@ -54,10 +61,16 @@
 - [x] TUI 窗口模式
 - [x] REPL 交互模式
 - [x] 命令行子命令架构
+- [x] stdin 命令支持（grep, wc, sed, awk）
+- [x] jq 数组索引支持
+- [x] md5sum/sha256sum 命令修正
+- [x] curl POST body 支持
+- [x] 配置文件加载
 
 ---
 
 ## 下一步优先级
-1. Tab 键检测（TUI 体验关键）
-2. 命令执行（让 TUI 有实际功能）
-3. AI 集成（核心价值）
+1. Tab 键检测（REPL 体验关键）
+2. 帮助文档完善
+3. 包管理功能
+4. AI 实际集成测试

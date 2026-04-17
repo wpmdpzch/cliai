@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -101,6 +102,33 @@ func applyFilter(data interface{}, filter string) (interface{}, error) {
 			continue
 		}
 
+		// 处理数组索引，如 [0] 或 [0:2]
+		if strings.HasPrefix(part, "[") && strings.HasSuffix(part, "]") {
+			idxStr := part[1 : len(part)-1]
+			
+			// 支持 [n] 格式
+			if idx, err := strconv.Atoi(idxStr); err == nil {
+				switch v := current.(type) {
+				case []interface{}:
+					if idx < 0 {
+						idx = len(v) + idx
+					}
+					if idx < 0 || idx >= len(v) {
+						return nil, nil
+					}
+					current = v[idx]
+				default:
+					return nil, fmt.Errorf("无法对 %T 应用数组索引", current)
+				}
+			} else if idxStr == "" {
+				// [\] 表示全部元素
+				current = current
+			} else {
+				return nil, fmt.Errorf("不支持的数组索引格式: %s", idxStr)
+			}
+			continue
+		}
+
 		switch v := current.(type) {
 		case map[string]interface{}:
 			if val, ok := v[part]; ok {
@@ -109,7 +137,18 @@ func applyFilter(data interface{}, filter string) (interface{}, error) {
 				return nil, nil
 			}
 		case []interface{}:
-			return nil, fmt.Errorf("数组索引需要 [n] 格式")
+			// 尝试将 part 作为数字索引
+			if idx, err := strconv.Atoi(part); err == nil {
+				if idx < 0 {
+					idx = len(v) + idx
+				}
+				if idx < 0 || idx >= len(v) {
+					return nil, nil
+				}
+				current = v[idx]
+			} else {
+				return nil, fmt.Errorf("无法在数组上使用字段名 '%s'", part)
+			}
 		default:
 			return nil, fmt.Errorf("无法在 %T 上应用字段 '%s'", current, part)
 		}

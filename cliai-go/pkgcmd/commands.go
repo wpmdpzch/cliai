@@ -3,6 +3,7 @@ package pkgcmd
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -120,6 +121,14 @@ func execSystemCmd(input string) *ExecResult {
 	}
 
 	cmd := exec.Command(args[0], args[1:]...)
+	
+	// 检查是否有 stdin 输入
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		// stdin 有数据，传递给它
+		cmd.Stdin = os.Stdin
+	}
+	
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
 	cmd.Stderr = &buf
@@ -141,8 +150,8 @@ func registerP1Commands() {
 		{Name: "find", Category: "file", Description: "查找文件", Usage: "find [options] <path> <expression>", Example: "find . -name '*.go'", Implemented: "system"},
 		{Name: "du", Category: "file", Description: "磁盘使用统计", Usage: "du [options] <path>", Example: "du -h .", Implemented: "system"},
 		{Name: "top", Category: "system", Description: "实时进程监控", Usage: "top [options]", Example: "top", Implemented: "system"},
-		{Name: "md5", Category: "encoding", Description: "MD5 哈希", Usage: "md5 [options] <file>", Example: "md5 file.txt", Implemented: "system"},
-		{Name: "sha256", Category: "encoding", Description: "SHA256 哈希", Usage: "sha256 [options] <file>", Example: "sha256 file.txt", Implemented: "system"},
+		{Name: "md5sum", Category: "encoding", Description: "MD5 哈希", Usage: "md5sum [options] <file>", Example: "md5sum file.txt", Implemented: "system"},
+		{Name: "sha256sum", Category: "encoding", Description: "SHA256 哈希", Usage: "sha256sum [options] <file>", Example: "sha256sum file.txt", Implemented: "system"},
 	}
 	for i := range cmds {
 		commands[cmds[i].Name] = &cmds[i]

@@ -31,6 +31,7 @@ func ExecCurlToWriter(args []string, w io.Writer) error {
 	headers := make(map[string]string)
 	showHeader := false
 	outputFile := ""
+	var data string
 
 	i := 0
 	for i < len(args) {
@@ -56,10 +57,13 @@ func ExecCurlToWriter(args []string, w io.Writer) error {
 				outputFile = args[i+1]
 				i++
 			}
-		case "-d", "--data":
+		case "-d", "--data", "--data-raw":
 			if i+1 < len(args) {
+				data = args[i+1]
 				method = "POST"
-				headers["Content-Type"] = "application/x-www-form-urlencoded"
+				if _, ok := headers["Content-Type"]; !ok {
+					headers["Content-Type"] = "application/x-www-form-urlencoded"
+				}
 				i++
 			}
 		default:
@@ -80,7 +84,11 @@ func ExecCurlToWriter(args []string, w io.Writer) error {
 	}
 
 	// 创建请求
-	req, err := http.NewRequest(method, url, nil)
+	var body io.Reader
+	if data != "" {
+		body = strings.NewReader(data)
+	}
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return err
 	}

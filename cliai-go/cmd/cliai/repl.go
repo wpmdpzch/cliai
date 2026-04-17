@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/wpmdpzch/cliai/config"
 	"github.com/wpmdpzch/cliai/core"
 	"github.com/wpmdpzch/cliai/pkgcmd"
 )
@@ -17,12 +18,12 @@ type REPL struct {
 	aiEngine *core.AIEngine
 }
 
-func NewREPL() *REPL {
+func NewREPL(cfg *config.Config) *REPL {
 	r := &REPL{
 		mode:    core.ModeCLI,
 		scanner: bufio.NewScanner(os.Stdin),
 	}
-	r.aiEngine = core.NewAIEngine(nil)
+	r.aiEngine = core.NewAIEngine(cfg)
 	return r
 }
 
