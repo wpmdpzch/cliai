@@ -20,7 +20,7 @@
 - [x] **curl 增强**：支持 POST、Header、Cookie 等
 - [x] **jq 增强**：支持数组索引、[n]、@unique 等
 - [x] **base64 文件支持**：支持从文件读取
-- [ ] **帮助文档**：内置命令帮助信息
+- [x] **帮助文档**：内置命令帮助信息
 
 ### P2 - 尽量完成
 - [x] **其他 P0 命令**：grep, cat, ls, ps, df, free, head, tail
@@ -37,6 +37,10 @@
 - [x] **jq 数组索引**: 不支持 [0] - 修复：实现 strconv.Atoi 解析
 - [x] **md5/sha256 命令名**: 系统命令是 md5sum/sha256sum - 修复：更新命令注册名
 - [x] **curl POST 数据**: -d 未传递 body - 修复：strings.NewReader(data)
+- [x] **错误信息不清晰**: stderr 混入 stdout - 修复：分离 stdout/stderr 输出
+- [x] **帮助信息简陋**: 无参数时无提示 - 修复：无参数自动显示帮助
+- [x] **commands 输出单调**: 无分类无图标 - 修复：emoji 分类 + 彩色输出
+- [x] **二进制内容乱码**: cat 等命令输出二进制时终端混乱 - 修复：二进制检测
 
 ### Tab 键检测
 - 当前 `bufio.Reader` 无法检测 Tab 键
@@ -66,11 +70,16 @@
 - [x] md5sum/sha256sum 命令修正
 - [x] curl POST body 支持
 - [x] 配置文件加载
+- [x] 彩色输出（错误/警告/提示）
+- [x] emoji 分类显示
+- [x] 二进制内容检测
+- [x] 欢迎信息边框
+- [x] 帮助信息增强
 
 ---
 
 ## 下一步优先级
 1. Tab 键检测（REPL 体验关键）
-2. 帮助文档完善
-3. 包管理功能
-4. AI 实际集成测试
+2. 包管理功能
+3. AI 实际集成测试
+4. TUI 显示优化
