@@ -160,7 +160,8 @@ func (t *TUI) formatModeBar() string {
 		color = colorModeBUILD
 		modeName = "BUILD"
 	}
-	hexStr := fmt.Sprintf("%06x", int(color))
+	r, g, b := color.RGB()
+	hexStr := fmt.Sprintf("%02x%02x%02x", r, g, b)
 	return fmt.Sprintf(" [::b]%s%s[::-]::[::-] ", hexStr, modeName)
 }
 
@@ -178,7 +179,8 @@ func (t *TUI) formatInputLabel() string {
 		color = colorModeBUILD
 		modeName = "BUILD"
 	}
-	hexStr := fmt.Sprintf("%06x", int(color))
+	r, g, b := color.RGB()
+	hexStr := fmt.Sprintf("%02x%02x%02x", r, g, b)
 	return fmt.Sprintf("[%s]%s>[-] ", hexStr, modeName)
 }
 
