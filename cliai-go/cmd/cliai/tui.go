@@ -177,7 +177,8 @@ func (t *TUI) formatInputLabel() string {
 		color = colorModeBUILD
 		modeName = "BUILD"
 	}
-	return fmt.Sprintf("[%s]%s>[-] ", color.Hex(), modeName)
+	hexStr := fmt.Sprintf("%06x", int(color))
+	return fmt.Sprintf("[%s]%s>[-] ", hexStr, modeName)
 }
 
 func (t *TUI) updateMode() {
